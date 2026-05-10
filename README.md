@@ -8,7 +8,7 @@ Which environmental factors most influence yield?
 Can weather forecasts improve prediction accuracy?
 Which model generalizes best across regions?
 ### Initital Models to use
-Linear Regression
-Random Forest
-XGBoost
+Linear Regression <br>
+Random Forest <br>
+XGBoost <br>
 Gradient Boosting
