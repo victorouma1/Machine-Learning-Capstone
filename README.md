@@ -1,9 +1,14 @@
 # Machine-Learning-Capstone
 ### Problem Statement
-Educational institutions struggle to identify at-risk students who may face difficulties in the job market, often due to a lack of integration between academic and socio-economic data.
+Farmers and agricultural planners need accurate yield forecasts to improve food security and resource planning.
 ### Description
-Build a predictive model to forecast the job viability of graduates based on a mix of academic performance (GPA, major), socio-economic status, and academic habits 
-
+Predict crop yield using weather conditions, rainfall, soil characteristics, pesticide use, and historical yield data.
 ### Research Questions
-Which categories—demographics, academic results, or socio-economic factors—serve as the most influential predictors of employment? <br>
-To what degree does the inclusion of non-academic proxies like volunterr hours improve the model's F1-score compared to a model relying strictly on quantitative academic metrics like GPA and core course grades? <br>
+Which environmental factors most influence yield?
+Can weather forecasts improve prediction accuracy?
+Which model generalizes best across regions?
+### Initital Models to use
+Linear Regression
+Random Forest
+XGBoost
+Gradient Boosting
