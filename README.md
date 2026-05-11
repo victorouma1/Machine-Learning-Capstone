@@ -15,7 +15,7 @@ XGBoost <br>
 Gradient Boosting
 ### Datsets
  FAOSTAT         - Crop yield target      
- CHIRPS          - Rainfall features      
+ HDX             - Rainfall features      
  NASA POWER      - Weather variables      
  SoilGrids       - Soil features          
  Kenya Open Data - County/local variables 
