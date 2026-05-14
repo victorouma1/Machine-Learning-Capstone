@@ -7,10 +7,17 @@ Predict crop yield using weather conditions, rainfall, soil characteristics, pes
 1. Data cleaning
 2. EDA
 3. Feature Engineering
-4. Model Selection
-5. Model Training
-6. Model Evaluation
-7. Model Optimisation
+4. First Model Selection
+5. First Model Training
+6. First Model Evaluation
+7. Second Model Selection
+8. Second Model Training
+9. Second Model Evaluation
+10. Third Model Selection
+11. Third Model Training
+12. Second Model Evaluation
+13. Final Model choosen for optimisation
+14. Final Model Optimisation
 
 
 ### Initital Models to use
