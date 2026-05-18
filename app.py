@@ -390,12 +390,19 @@ def plot_residuals(y_test, y_pred, title="Residual Plot"):
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
 
-def plot_learning_curve(model, X_train, y_train, title="Learning Curve"):
+@st.cache_data
+def compute_learning_curve(_model, X_train, y_train, model_key: str):
+    """Cache the expensive CV computation so it only runs once per model."""
     sizes, tr_scores, val_scores = learning_curve(
-        model, X_train, y_train,
+        _model, X_train, y_train,
         cv=5, scoring="r2",
         train_sizes=np.linspace(0.1, 1.0, 10),
+        n_jobs=-1,
     )
+    return sizes, tr_scores, val_scores
+
+def plot_learning_curve(model, X_train, y_train, title="Learning Curve", model_key: str = ""):
+    sizes, tr_scores, val_scores = compute_learning_curve(model, X_train, y_train, model_key)
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(sizes, tr_scores.mean(axis=1),  label="Training Score",   color="#00e5ff", lw=2, marker="o")
     ax.plot(sizes, val_scores.mean(axis=1), label="Validation Score", color="#b5ff2d", lw=2, marker="s")
@@ -484,12 +491,9 @@ with tabs[1]:
     st.markdown('<p class="section-subtitle">Value Counts</p>', unsafe_allow_html=True)
     vc_col = st.selectbox("Choose a column", ["Item", "Area", "Year"])
     vc = raw_data[vc_col].value_counts().head(20)
-    fig, ax = plt.subplots(figsize=(9, 4))
-    bars = ax.barh(vc.index[::-1], vc.values[::-1], color=ACCENT_PALETTE[0])
-    ax.set_xlabel("Count")
-    ax.set_title(f"Top 20 — {vc_col}", fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
-    plt.close(fig)
+    vc_df = vc.reset_index()
+    vc_df.columns = [vc_col, "Count"]
+    st.dataframe(vc_df, use_container_width=True, hide_index=True)
 
     fancy_hr()
 
@@ -660,7 +664,7 @@ with tabs[5]:
     fancy_hr()
 
     st.markdown('<p class="section-subtitle">Learning Curve</p>', unsafe_allow_html=True)
-    plot_learning_curve(poly_m, poly2.transform(X_train), y_train, "Learning Curve — Polynomial (degree 2)")
+    plot_learning_curve(poly_m, poly2.transform(X_train), y_train, "Learning Curve — Polynomial (degree 2)", model_key="poly2")
     insight(
         "Training and validation scores converge as dataset size grows, indicating good "
         "generalisation without severe overfitting at degree 2.",
@@ -685,7 +689,7 @@ with tabs[6]:
 
     fancy_hr()
     st.markdown('<p class="section-subtitle">Learning Curve</p>', unsafe_allow_html=True)
-    plot_learning_curve(ridge, X_train, y_train, "Learning Curve — Polynomial Ridge (degree 3)")
+    plot_learning_curve(ridge, X_train, y_train, "Learning Curve — Polynomial Ridge (degree 3)", model_key="ridge")
     insight(
         "Ridge regression adds an L2 penalty that shrinks large coefficients without eliminating them. "
         "Using degree-3 polynomial features with Ridge helps capture further non-linearity while "
@@ -743,7 +747,7 @@ with tabs[8]:
 
     insight(
         "A shallow decision tree (depth 5) is interpretable and fast but may miss complex "
-        "interactions. Feature importance scores reveal which variables drive the most splits.",
+        "interactions.",
         color="lime"
     )
 
@@ -773,11 +777,11 @@ with tabs[9]:
 
     fancy_hr()
     st.markdown('<p class="section-subtitle">Learning Curve</p>', unsafe_allow_html=True)
-    plot_learning_curve(rf, X_train, y_train, "Learning Curve — Random Forest")
+    plot_learning_curve(rf, X_train, y_train, "Learning Curve — Random Forest", model_key="rf")
     insight(
-        "The Random Forest ensembles many decision trees, reducing variance and typically achieving "
-        "higher accuracy than a single tree. The learning curve shows how performance stabilises "
-        "as training data grows.",
+        "The Random Forest ensembles many decision trees, reducing variance and achieving "
+        "higher accuracy than a single tree. The learning curve shows the model is generalising "
+        "well",
         color="coral"
     )
 
@@ -840,9 +844,9 @@ with tabs[10]:
 
     fancy_hr()
     st.markdown('<p class="section-subtitle">Learning Curve — Tuned Ridge</p>', unsafe_allow_html=True)
-    plot_learning_curve(ridge_t, X_train, y_train, "Learning Curve — Polynomial Ridge Tuned (degree 7)")
+    plot_learning_curve(ridge_t, X_train, y_train, "Learning Curve — Polynomial Ridge Tuned (degree 7)", model_key="ridge_tuned")
     insight(
-        "The learning curve for the tuned model shows whether the degree-7 polynomial is overfitting "
-        "(large gap between train and validation) or generalising well (curves converging).",
+        "The learning curve for the tuned model shows generalising well as the curves converge at a "
+        "high value for the R² score",
         color="coral"
     )
