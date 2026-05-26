@@ -24,5 +24,6 @@ Predict crop yield using weather conditions, rainfall, soil characteristics, pes
 Linear Regression <br>
 Polynomial Regression <br>
 Decision trees <br>
-### Datsets
-yield_df dataset 
+Random Forest <br>
+### Datasets
+yield_df dataset kaggle
