@@ -276,15 +276,20 @@ def load_and_clean():
 @st.cache_data
 def build_features(_data):
     data = _data.copy()
+    # Preserve original categorical labels before encoding (for error analysis)
+    original_labels = _data[["Area", "Item"]].copy()
     encoder = TargetEncoder(cols=["Area", "Item"])
     data[["Area", "Item"]] = encoder.fit_transform(data[["Area", "Item"]], data["hg/ha_yield"])
     X = data.drop(columns="hg/ha_yield")
     y = data["hg/ha_yield"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Align original labels to the test split using its index, then reset so it
+    # stays in sync with the numpy arrays returned below
+    test_labels = original_labels.loc[X_test.index].reset_index(drop=True)
     scaler = RobustScaler()
     X_train_s = scaler.fit_transform(X_train)
     X_test_s  = scaler.transform(X_test)
-    return data, X_train_s, X_test_s, y_train, y_test
+    return data, X_train_s, X_test_s, y_train, y_test, test_labels
 
 @st.cache_resource
 def train_all(X_train, X_test, y_train, y_test):
@@ -303,18 +308,18 @@ def train_all(X_train, X_test, y_train, y_test):
     models["poly2"]   = poly_m
     models["poly2_t"] = poly2
 
-    # Ridge (degree 3)
+    # Ridge (degree 2)
     ridge = Pipeline([
-        ("poly", PolynomialFeatures(degree=3)),
+        ("poly", PolynomialFeatures(degree=2)),
         ("scaler_post_poly", StandardScaler()),
         ("ridge", Ridge(alpha=1.0)),
     ])
     ridge.fit(X_train, y_train)
     models["ridge"] = ridge
 
-    # Lasso (degree 3)
+    # Lasso (degree 2)
     lasso = Pipeline([
-        ("poly", PolynomialFeatures(degree=3)),
+        ("poly", PolynomialFeatures(degree=2)),
         ("scaler_post_poly", StandardScaler()),
         ("lasso", Lasso(alpha=1.0)),
     ])
@@ -436,7 +441,7 @@ if not data_ready:
     """, unsafe_allow_html=True)
     st.stop()
 
-feat_data, X_train, X_test, y_train, y_test = build_features(raw_data)
+feat_data, X_train, X_test, y_train, y_test, test_labels = build_features(raw_data)
 
 with st.spinner("Training all models — hang tight..."):
     models = train_all(X_train, X_test, y_train, y_test)
@@ -454,6 +459,7 @@ tabs = st.tabs([
     "Decision Tree",
     "Random Forest",
     "Hyperparameter Tuning",
+    "Error Analysis",
 ])
 
 with tabs[0]:
@@ -674,7 +680,7 @@ with tabs[5]:
 with tabs[6]:
     st.markdown('<p class="section-title">Ridge Regularization</p>', unsafe_allow_html=True)
     st.markdown(
-        '<span class="chip">Degree 3</span> <span class="chip lime">L2 Penalty</span> <span class="chip coral">α = 1.0</span>',
+        '<span class="chip">Degree 2</span> <span class="chip lime">L2 Penalty</span> <span class="chip coral">α = 1.0</span>',
         unsafe_allow_html=True
     )
 
@@ -689,10 +695,10 @@ with tabs[6]:
 
     fancy_hr()
     st.markdown('<p class="section-subtitle">Learning Curve</p>', unsafe_allow_html=True)
-    plot_learning_curve(ridge, X_train, y_train, "Learning Curve — Polynomial Ridge (degree 3)", model_key="ridge")
+    plot_learning_curve(ridge, X_train, y_train, "Learning Curve — Polynomial Ridge (degree 2)", model_key="ridge")
     insight(
         "Ridge regression adds an L2 penalty that shrinks large coefficients without eliminating them. "
-        "Using degree-3 polynomial features with Ridge helps capture further non-linearity while "
+        "Using degree-2 polynomial features with Ridge helps capture further non-linearity while "
         "keeping the model stable.",
         color="purple"
     )
@@ -700,7 +706,7 @@ with tabs[6]:
 with tabs[7]:
     st.markdown('<p class="section-title">Lasso Regularization</p>', unsafe_allow_html=True)
     st.markdown(
-        '<span class="chip">Degree 3</span> <span class="chip lime">L1 Penalty</span> <span class="chip coral">α = 1.0</span>',
+        '<span class="chip">Degree 2</span> <span class="chip lime">L1 Penalty</span> <span class="chip coral">α = 1.0</span>',
         unsafe_allow_html=True
     )
 
@@ -745,11 +751,11 @@ with tabs[8]:
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
 
-    insight(
-        "A shallow decision tree (depth 5) is interpretable and fast but may miss complex "
-        "interactions.",
-        color="lime"
-    )
+    #insight(
+        #"A shallow decision tree (depth 5) is interpretable and fast but may miss complex "
+        #"interactions.",
+        #color="lime"
+    #)
 
 with tabs[9]:
     st.markdown('<p class="section-title">Random Forest</p>', unsafe_allow_html=True)
@@ -816,8 +822,8 @@ with tabs[10]:
     comparison = {
         "Linear Regression":       r2_score(y_test, models["lr"].predict(X_test)),
         "Polynomial (deg 2)":      r2_score(y_test, models["poly2"].predict(models["poly2_t"].transform(X_test))),
-        "Ridge (deg 3)":           r2_score(y_test, models["ridge"].predict(X_test)),
-        "Lasso (deg 3)":           r2_score(y_test, models["lasso"].predict(X_test)),
+        "Ridge (deg 2)":           r2_score(y_test, models["ridge"].predict(X_test)),
+        "Lasso (deg 2)":           r2_score(y_test, models["lasso"].predict(X_test)),
         "Decision Tree":           r2_score(y_test, models["dt"].predict(X_test)),
         "Random Forest":           r2_score(y_test, models["rf"].predict(X_test)),
         "Ridge Tuned (deg 7)":     r2_score(y_test, te_rt),
@@ -850,3 +856,159 @@ with tabs[10]:
         "high value for the R² score",
         color="coral"
     )
+
+with tabs[11]:
+    st.markdown('<p class="section-title">Error Analysis</p>', unsafe_allow_html=True)
+
+    model_options = {
+        "Ridge Tuned (deg 7)": "ridge_tuned",
+        "Random Forest":                    "rf",
+        "Ridge (deg 2)":                    "ridge",
+        "Polynomial (deg 2)":               "poly2",
+        "Decision Tree":                    "dt",
+        "Linear Regression":                "lr",
+        "Lasso (deg 2)":                    "lasso",
+    }
+    chosen_label = st.selectbox(
+        "Select model to analyse",
+        list(model_options.keys()),
+        index=0,
+    )
+    chosen_key = model_options[chosen_label]
+
+
+    if chosen_key == "poly2":
+        ea_preds = models["poly2"].predict(models["poly2_t"].transform(X_test))
+    else:
+        ea_preds = models[chosen_key].predict(X_test)
+
+    y_test_arr   = np.array(y_test)
+    abs_errors   = np.abs(y_test_arr - ea_preds)
+    signed_errors = y_test_arr - ea_preds
+
+    ea_df = test_labels.copy().reset_index(drop=True)
+    ea_df["Actual"]       = y_test_arr
+    ea_df["Predicted"]    = ea_preds
+    ea_df["Abs_Error"]    = abs_errors
+    ea_df["Signed_Error"] = signed_errors
+
+
+    st.markdown('<p class="section-subtitle">Overall Error Metrics</p>', unsafe_allow_html=True)
+    st.markdown(metrics_html(y_test, ea_preds, "Test", "#b06cff"), unsafe_allow_html=True)
+    fancy_hr()
+
+    top_n = st.slider("Number of top groups to display", min_value=5, max_value=30, value=15, step=5)
+
+    st.markdown('<p class="section-subtitle">Error by Crop Item</p>', unsafe_allow_html=True)
+
+    item_err = (
+        ea_df.groupby("Item")
+        .agg(
+            MAE=("Abs_Error", "mean"),
+            RMSE=("Abs_Error", lambda x: np.sqrt((x**2).mean())),
+            Count=("Abs_Error", "count"),
+        )
+        .reset_index()
+        .sort_values("MAE", ascending=False)
+    )
+
+    st.markdown("**Top items by MAE (highest error first)**")
+    top_items = item_err.head(top_n)
+    fig, ax = plt.subplots(figsize=(7, max(3.5, top_n * 0.32)))
+    colors_bar = ["#ff5e78" if i < 5 else "#b06cff" if i < 10 else "#00e5ff"
+                  for i in range(len(top_items))]
+    bars = ax.barh(top_items["Item"][::-1], top_items["MAE"][::-1], color=colors_bar[::-1])
+    ax.set_xlabel("Mean Absolute Error (hg/ha)")
+    ax.set_title(f"Top {top_n} Crop Items — MAE", fontweight="bold")
+    for bar, val in zip(bars, top_items["MAE"][::-1]):
+        ax.text(bar.get_width() + top_items["MAE"].max() * 0.01,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:,.0f}", va="center", fontsize=8, color="#e8f0fe")
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
+
+    st.markdown("**Item Error Summary Table**")
+    st.dataframe(
+        item_err.style.background_gradient(subset=["MAE", "RMSE"], cmap="Reds"),
+        use_container_width=True, hide_index=True
+    )
+
+    insight(
+        "Crops with the <strong>highest MAE</strong> are where the model struggles most — "
+        "often items with high yield variance or sparse training samples.",
+        color="coral"
+    )
+    fancy_hr()
+
+
+    st.markdown('<p class="section-subtitle">Error by Area / Region</p>', unsafe_allow_html=True)
+
+    area_err = (
+        ea_df.groupby("Area")
+        .agg(
+            MAE=("Abs_Error", "mean"),
+            RMSE=("Abs_Error", lambda x: np.sqrt((x**2).mean())),
+            Count=("Abs_Error", "count"),
+        )
+        .reset_index()
+        .sort_values("MAE", ascending=False)
+    )
+
+    st.markdown("**Top areas by MAE (highest error first)**")
+    top_areas = area_err.head(top_n)
+    fig, ax = plt.subplots(figsize=(8, max(3.5, top_n * 0.32)))
+    area_colors = ["#ff5e78" if i < 5 else "#b06cff" if i < 10 else "#00e5ff"
+                   for i in range(len(top_areas))]
+    bars = ax.barh(top_areas["Area"][::-1], top_areas["MAE"][::-1], color=area_colors[::-1])
+    ax.set_xlabel("Mean Absolute Error (hg/ha)")
+    ax.set_title(f"Top {top_n} Areas — MAE", fontweight="bold")
+    for bar, val in zip(bars, top_areas["MAE"][::-1]):
+        ax.text(bar.get_width() + top_areas["MAE"].max() * 0.01,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:,.0f}", va="center", fontsize=8, color="#e8f0fe")
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
+
+    st.markdown("**Area Error Summary Table**")
+    st.dataframe(
+        area_err.style.background_gradient(subset=["MAE", "RMSE"], cmap="Reds"),
+        use_container_width=True, hide_index=True
+    )
+
+    #insight(
+        #"Areas with high MAE often reflect regions where crop yield varies widely across "
+        #"different crop types, or where training data is sparse. "
+        #"Cross-reference with the Item breakdown above to identify crop–region combinations "
+        #"that are driving the largest errors.",
+        #color="purple"
+    #)
+    fancy_hr()
+
+
+    st.markdown('<p class="section-subtitle">Worst Individual Predictions</p>', unsafe_allow_html=True)
+
+    worst_n = st.slider("Show worst N predictions", min_value=10, max_value=100, value=20, step=10)
+    worst_df = (
+        ea_df[["Item", "Area", "Actual", "Predicted", "Abs_Error"]]
+        .sort_values("Abs_Error", ascending=False)
+        .head(worst_n)
+        .reset_index(drop=True)
+    )
+    worst_df.index += 1
+    worst_df.columns = ["Crop Item", "Area", "Actual (hg/ha)", "Predicted (hg/ha)",
+                         "Abs Error"]
+    st.dataframe(
+        worst_df.style
+            .background_gradient(subset=["Abs Error"], cmap="Reds")
+            .format({"Actual (hg/ha)": "{:,.0f}", "Predicted (hg/ha)": "{:,.0f}",
+                     "Abs Error": "{:,.0f}"}),
+        use_container_width=True
+    )
+
+    #insight(
+        #"The table above lists the individual rows where the model is farthest from the truth. "
+        #"Use these as diagnostic cases — cross-reference the Crop Item and Area columns with "
+        #"the grouped bar charts above to confirm whether the errors are systemic (entire crop/region "
+        #"is hard to model) or isolated outliers.",
+        #color="yellow"
+    #)
