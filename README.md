@@ -2,7 +2,7 @@
 ### Problem Statement
 Farmers experience fluctuating agricultural productivity due to climate variability, rainfall inconsistency, soil degradation, and changing farming practices. Accurate crop yield prediction can help farmers, policymakers, and agricultural organizations improve planning and food security.
 ### Description
-Predict crop yield using weather conditions, rainfall, soil characteristics, pesticide use, and historical yield data.
+Predict crop yield using rainfall, pesticide use,average temperature, type of crop, location and historical yield data (1990 - 2013).
 ### Workflow
 1. Data cleaning
 2. EDA

@@ -448,6 +448,7 @@ with st.spinner("Training all models — hang tight..."):
 
 
 tabs = st.tabs([
+    "Overview",
     "Data Cleaning",
     "EDA",
     "Linear Separability",
@@ -463,6 +464,91 @@ tabs = st.tabs([
 ])
 
 with tabs[0]:
+    st.markdown('<p class="section-title">Project Overview</p>', unsafe_allow_html=True)
+
+    # Problem Statement
+    st.markdown("""
+    <div class="insight-card lime">
+        <strong style="font-size:1.1rem; font-family:'Bebas Neue',sans-serif; letter-spacing:1.5px;">
+             PROBLEM STATEMENT
+        </strong><br><br>
+        Farmers experience fluctuating agricultural productivity due to <strong>climate variability</strong>,
+        <strong>rainfall inconsistency</strong>, <strong>soil degradation</strong>, and changing farming practices.
+        Accurate crop yield prediction can help farmers, policymakers, and agricultural organizations
+        improve planning and food security.
+    </div>
+    """, unsafe_allow_html=True)
+
+    fancy_hr()
+
+    # Description
+    st.markdown('<p class="section-subtitle">Description</p>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="insight-card">
+        Predict crop yield using a combination of environmental and agricultural features drawn from
+        historical records spanning <strong>1990 – 2013</strong>. The features used are:
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div class="metric-box" style="text-align:left; padding:1.2rem 1.4rem;">
+            <div class="label">Numerical Features</div>
+            <ul style="margin:.6rem 0 0; padding-left:1.2rem; color:var(--text); font-size:.95rem; line-height:2;">
+                <li> Rainfall</li>
+                <li> Pesticide use</li>
+                <li> Average temperature</li>
+                <li> Years: 1990 – 2013</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="metric-box" style="text-align:left; padding:1.2rem 1.4rem;">
+            <div class="label">Categorical Features</div>
+            <ul style="margin:.6rem 0 0; padding-left:1.2rem; color:var(--text); font-size:.95rem; line-height:2;">
+                <li> Type of crop</li>
+                <li> Location / Area</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="metric-box" style="text-align:left; padding:1.2rem 1.4rem;">
+            <div class="label">Target Variable</div>
+            <ul style="margin:.6rem 0 0; padding-left:1.2rem; color:var(--text); font-size:.95rem; line-height:2;">
+                <li> Historical yield data</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    fancy_hr()
+
+    # Dataset
+    st.markdown('<p class="section-subtitle">Dataset</p>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="insight-card purple">
+        <strong style="font-family:'Bebas Neue',sans-serif; letter-spacing:1.2px; font-size:1.05rem;">
+             yield_df — Kaggle
+        </strong><br><br>
+        The <code>yield_df</code> dataset is sourced from <strong>Kaggle</strong> and contains global
+        crop yield records compiled from the FAO (Food and Agriculture Organization of the United Nations).
+        It covers multiple crops across numerous countries, paired with climate and agricultural input data
+        for each year.
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_a, col_b, col_c, col_d = st.columns(4)
+    col_a.metric("Source", "Kaggle / FAO")
+    col_b.metric("Time Span", "1990 – 2013")
+    col_c.metric("Target", "hg/ha Yield")
+    col_d.metric("Task Type", "Regression")
+
+    fancy_hr()
+
+
+with tabs[1]:
     st.markdown('<p class="section-title">Data Cleaning</p>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
@@ -490,7 +576,7 @@ with tabs[0]:
         color="lime"
     )
 
-with tabs[1]:
+with tabs[2]:
     st.markdown('<p class="section-title">Exploratory Data Analysis</p>', unsafe_allow_html=True)
 
     # Value counts
@@ -543,7 +629,7 @@ with tabs[1]:
         color="purple"
     )
 
-with tabs[2]:
+with tabs[3]:
     st.markdown('<p class="section-title">Linear Separability</p>', unsafe_allow_html=True)
     st.info("Generating pairplot — this may take a few seconds...")
 
@@ -572,7 +658,7 @@ with tabs[2]:
         color="lime"
     )
 
-with tabs[3]:
+with tabs[4]:
     st.markdown('<p class="section-title">Feature Engineering</p>', unsafe_allow_html=True)
 
     st.markdown('<p class="section-subtitle">Encoded Dataset Preview</p>', unsafe_allow_html=True)
@@ -597,7 +683,7 @@ with tabs[3]:
         color="yellow"
     )
 
-with tabs[4]:
+with tabs[5]:
     st.markdown('<p class="section-title">Linear Regression</p>', unsafe_allow_html=True)
 
     lr   = models["lr"]
@@ -638,7 +724,7 @@ with tabs[4]:
         color="purple"
     )
 
-with tabs[5]:
+with tabs[6]:
     st.markdown('<p class="section-title">Polynomial Regression</p>', unsafe_allow_html=True)
 
     poly2   = models["poly2_t"]
@@ -677,7 +763,7 @@ with tabs[5]:
         color="purple"
     )
 
-with tabs[6]:
+with tabs[7]:
     st.markdown('<p class="section-title">Ridge Regularization</p>', unsafe_allow_html=True)
     st.markdown(
         '<span class="chip">Degree 2</span> <span class="chip lime">L2 Penalty</span> <span class="chip coral">α = 1.0</span>',
@@ -703,7 +789,7 @@ with tabs[6]:
         color="purple"
     )
 
-with tabs[7]:
+with tabs[8]:
     st.markdown('<p class="section-title">Lasso Regularization</p>', unsafe_allow_html=True)
     st.markdown(
         '<span class="chip">Degree 2</span> <span class="chip lime">L1 Penalty</span> <span class="chip coral">α = 1.0</span>',
@@ -726,7 +812,7 @@ with tabs[7]:
         color="yellow"
     )
 
-with tabs[8]:
+with tabs[9]:
     st.markdown('<p class="section-title">Decision Tree</p>', unsafe_allow_html=True)
     st.markdown('<span class="chip">max_depth = 5</span>', unsafe_allow_html=True)
 
@@ -757,7 +843,7 @@ with tabs[8]:
         #color="lime"
     #)
 
-with tabs[9]:
+with tabs[10]:
     st.markdown('<p class="section-title">Random Forest</p>', unsafe_allow_html=True)
     st.markdown('<span class="chip">100 estimators</span> <span class="chip lime">random_state = 42</span>', unsafe_allow_html=True)
 
@@ -791,7 +877,7 @@ with tabs[9]:
         color="coral"
     )
 
-with tabs[10]:
+with tabs[11]:
     st.markdown('<p class="section-title">Hyperparameter Tuning</p>', unsafe_allow_html=True)
 
     st.markdown("""
@@ -857,7 +943,7 @@ with tabs[10]:
         color="coral"
     )
 
-with tabs[11]:
+with tabs[12]:
     st.markdown('<p class="section-title">Error Analysis</p>', unsafe_allow_html=True)
 
     model_options = {
