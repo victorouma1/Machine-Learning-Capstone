@@ -837,11 +837,6 @@ with tabs[9]:
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
 
-    #insight(
-        #"A shallow decision tree (depth 5) is interpretable and fast but may miss complex "
-        #"interactions.",
-        #color="lime"
-    #)
 
 with tabs[10]:
     st.markdown('<p class="section-title">Random Forest</p>', unsafe_allow_html=True)
@@ -1019,11 +1014,6 @@ with tabs[12]:
         use_container_width=True, hide_index=True
     )
 
-    insight(
-        "Crops with the <strong>highest MAE</strong> are where the model struggles most — "
-        "often items with high yield variance or sparse training samples.",
-        color="coral"
-    )
     fancy_hr()
 
 
@@ -1061,13 +1051,6 @@ with tabs[12]:
         use_container_width=True, hide_index=True
     )
 
-    #insight(
-        #"Areas with high MAE often reflect regions where crop yield varies widely across "
-        #"different crop types, or where training data is sparse. "
-        #"Cross-reference with the Item breakdown above to identify crop–region combinations "
-        #"that are driving the largest errors.",
-        #color="purple"
-    #)
     fancy_hr()
 
 
@@ -1090,11 +1073,3 @@ with tabs[12]:
                      "Abs Error": "{:,.0f}"}),
         use_container_width=True
     )
-
-    #insight(
-        #"The table above lists the individual rows where the model is farthest from the truth. "
-        #"Use these as diagnostic cases — cross-reference the Crop Item and Area columns with "
-        #"the grouped bar charts above to confirm whether the errors are systemic (entire crop/region "
-        #"is hard to model) or isolated outliers.",
-        #color="yellow"
-    #)
