@@ -258,7 +258,7 @@ sns.set_palette(ACCENT_PALETTE)
 
 st.markdown("""
 <div class="hero">
-  <p class="hero-title">🌾 Crop Yield ML Explorer</p>
+  <p class="hero-title"> Crop Yield ML Explorer</p>
   <p class="hero-sub">
     An end-to-end machine-learning walkthrough — from raw data to tuned models —
     for predicting agricultural crop yield.
