@@ -381,7 +381,7 @@ def plot_actual_vs_predicted(y_test, y_pred, title="Actual vs. Predicted"):
     ax.set_ylabel("Predicted Values")
     ax.set_title(title, fontsize=14, fontweight="bold")
     ax.legend()
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
 def plot_residuals(y_test, y_pred, title="Residual Plot"):
@@ -392,7 +392,7 @@ def plot_residuals(y_test, y_pred, title="Residual Plot"):
     ax.set_xlabel("Predicted Values")
     ax.set_ylabel("Residuals (Errors)")
     ax.set_title(title, fontsize=14, fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
 @st.cache_data
@@ -416,7 +416,7 @@ def plot_learning_curve(model, X_train, y_train, title="Learning Curve", model_k
     ax.set_ylabel("R² Score")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
 def fancy_hr():
@@ -559,7 +559,7 @@ with tabs[1]:
     fancy_hr()
 
     st.markdown('<p class="section-subtitle">Dataset Preview</p>', unsafe_allow_html=True)
-    st.dataframe(raw_data.head(10), use_container_width=True)
+    st.dataframe(raw_data.head(10), width = 'stretch')
 
     st.markdown('<p class="section-subtitle">Column Info</p>', unsafe_allow_html=True)
     info_df = pd.DataFrame({
@@ -568,7 +568,7 @@ with tabs[1]:
         "Non-Null": raw_data.notnull().sum().values,
         "Nulls":    raw_data.isnull().sum().values,
     })
-    st.dataframe(info_df, use_container_width=True)
+    st.dataframe(info_df, width = 'stretch')
 
     insight(
         "The <code>Unnamed: 0</code> column was dropped — it was a redundant index artifact "
@@ -585,7 +585,7 @@ with tabs[2]:
     vc = raw_data[vc_col].value_counts().head(20)
     vc_df = vc.reset_index()
     vc_df.columns = [vc_col, "Count"]
-    st.dataframe(vc_df, use_container_width=True, hide_index=True)
+    st.dataframe(vc_df, width = 'stretch', hide_index=True)
 
     fancy_hr()
 
@@ -600,7 +600,7 @@ with tabs[2]:
                 fig, ax = plt.subplots(figsize=(5, 3.5))
                 sns.histplot(raw_data[col], kde=True, ax=ax, color="#00e5ff", alpha=0.6)
                 ax.set_title(col, fontweight="bold")
-                st.pyplot(fig, use_container_width=True)
+                st.pyplot(fig, width = 'stretch')
                 plt.close(fig)
 
     insight(
@@ -620,7 +620,7 @@ with tabs[2]:
         linewidths=0.5, linecolor="#0b0f1a",
     )
     ax.set_title("Correlation Heatmap", fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
     insight(
@@ -647,7 +647,7 @@ with tabs[3]:
     for ax in fig.axes.flatten():
         if ax:
             ax.set_facecolor("#1a2235")
-    st.pyplot(fig.figure, use_container_width=True)
+    st.pyplot(fig.figure, width = 'stretch')
     plt.close(fig.figure)
 
     insight(
@@ -662,14 +662,14 @@ with tabs[4]:
     st.markdown('<p class="section-title">Feature Engineering</p>', unsafe_allow_html=True)
 
     st.markdown('<p class="section-subtitle">Encoded Dataset Preview</p>', unsafe_allow_html=True)
-    st.dataframe(feat_data.head(10), use_container_width=True)
+    st.dataframe(feat_data.head(10), width = 'stretch')
 
     st.markdown('<p class="section-subtitle">Column Types After Encoding</p>', unsafe_allow_html=True)
     info_df2 = pd.DataFrame({
         "Column": feat_data.columns,
         "Dtype":  feat_data.dtypes.values.astype(str),
     })
-    st.dataframe(info_df2, use_container_width=True)
+    st.dataframe(info_df2, width = 'stretch')
 
     st.markdown(
         '<span class="chip">Area</span> <span class="chip lime">Item</span> '
@@ -834,7 +834,7 @@ with tabs[9]:
     bars = ax.barh(fi.index, fi.values, color=ACCENT_PALETTE[:len(fi)])
     ax.set_xlabel("Importance")
     ax.set_title("Decision Tree — Feature Importances", fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
 
@@ -859,7 +859,7 @@ with tabs[10]:
     ax.barh(fi_rf.index, fi_rf.values, color=ACCENT_PALETTE[:len(fi_rf)])
     ax.set_xlabel("Importance")
     ax.set_title("Random Forest — Feature Importances", fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
     fancy_hr()
@@ -919,7 +919,7 @@ with tabs[11]:
     for bar, val in zip(bars, comp_df["Test R²"]):
         ax.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height() / 2,
                 f"{val:.4f}", va="center", fontsize=9, color="#e8f0fe")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
     insight(
@@ -1005,13 +1005,13 @@ with tabs[12]:
         ax.text(bar.get_width() + top_items["MAE"].max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val:,.0f}", va="center", fontsize=8, color="#e8f0fe")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
     st.markdown("**Item Error Summary Table**")
     st.dataframe(
         item_err.style.background_gradient(subset=["MAE", "RMSE"], cmap="Reds"),
-        use_container_width=True, hide_index=True
+        width = 'stretch', hide_index=True
     )
 
     fancy_hr()
@@ -1042,13 +1042,13 @@ with tabs[12]:
         ax.text(bar.get_width() + top_areas["MAE"].max() * 0.01,
                 bar.get_y() + bar.get_height() / 2,
                 f"{val:,.0f}", va="center", fontsize=8, color="#e8f0fe")
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width = 'stretch')
     plt.close(fig)
 
     st.markdown("**Area Error Summary Table**")
     st.dataframe(
         area_err.style.background_gradient(subset=["MAE", "RMSE"], cmap="Reds"),
-        use_container_width=True, hide_index=True
+        width = 'stretch', hide_index=True
     )
 
     fancy_hr()
@@ -1071,5 +1071,5 @@ with tabs[12]:
             .background_gradient(subset=["Abs Error"], cmap="Reds")
             .format({"Actual (hg/ha)": "{:,.0f}", "Predicted (hg/ha)": "{:,.0f}",
                      "Abs Error": "{:,.0f}"}),
-        use_container_width=True
+        width = 'stretch'
     )
